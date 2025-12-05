@@ -1,7 +1,9 @@
 import express from "express";
 import TelegramBot from "node-telegram-bot-api";
 import bodyParser from "body-parser";
-import { Configuration, OpenAIApi } from "openai";
+import OpenAI from "openai";
+const openai = new OpenAI({ apiKey: process.env.OPENAI_KEY });
+
 
 const app = express();
 app.use(bodyParser.json());
@@ -75,15 +77,15 @@ app.post("/transcript", async (req, res) => {
   console.log("Received transcript from call:", number);
 
   // Get AI summary
-  const summaryResponse = await openai.createChatCompletion({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: AI_PERSONALITY },
-      { role: "user", content: transcript }
-    ]
-  });
+ const summaryResponse = await openai.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [
+    { role: "system", content: AI_PERSONALITY },
+    { role: "user", content: transcript }
+  ]
+});
 
-  const summary = summaryResponse.data.choices[0].message.content;
+const summary = summaryResponse.choices[0].message.content;
 
   // Send transcript + summary to you (Parth)
   await bot.sendMessage(
